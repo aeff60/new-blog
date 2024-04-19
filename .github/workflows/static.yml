@@ -1,3 +1,4 @@
+# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
@@ -14,45 +15,29 @@ permissions:
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Two jobs: one to build the content and one to deploy
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install dependencies 
-        # Example using Node.js, adjust if needed
-        run: npm install
-      - name: Build 
-        # Example using Node.js, adjust if needed
-        run: npm run build
-
-      # Upload the build output as an artifact
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: website
-          path: dist # Replace 'dist' with your build output folder
-
+  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build # Depends on the 'build' job
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: website
-          path: .  # Extract files directly into the root 
+          # Upload entire repository
+          path: "."
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4
